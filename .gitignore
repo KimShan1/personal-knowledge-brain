@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+pkb-env/
+.env.*
+
+# Node / React
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+
+# Vite / frontend artifacts
+frontend/node_modules/
+frontend/dist/
+backend/app/uploads/
+
+# VSCode / IDE
+.vscode/
+.idea/
+
