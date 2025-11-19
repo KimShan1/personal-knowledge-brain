@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { MathJax } from 'better-react-mathjax';
 import './App.css';
+// Read from .env if present, otherwise fall back to your Render backend URL
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://personal-knowledge-brain.onrender.com";
+
+console.log("API_BASE_URL =", API_BASE_URL);
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -13,6 +19,7 @@ function App() {
   const [answering, setAnswering] = useState(false);
 
   async function handleUpload() {
+  console.log("handleUpload clicked, selectedFile =", selectedFile);
   if (!selectedFile) return;
 
   setUploading(true);
@@ -22,18 +29,22 @@ function App() {
   formData.append("file", selectedFile);
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/upload-paper", {
+    const res = await fetch(`${API_BASE_URL}/upload-paper`, {
       method: "POST",
       body: formData,
     });
+
+    console.log("upload-paper response status =", res.status);
 
     if (!res.ok) {
       throw new Error(`Upload failed: ${res.status}`);
     }
 
     const data = await res.json();
+    console.log("upload-paper JSON =", data);
     setUploadResult(JSON.stringify(data, null, 2));
   } catch (err) {
+    console.error("upload-paper error:", err);
     setUploadResult("Error: " + err.message);
   }
 
@@ -41,22 +52,25 @@ function App() {
 }
 
 async function handleSummarize() {
+  console.log("handleSummarize clicked");
   setSummarizing(true);
   setSummary("Summarizing...");
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/summarize-paper", {
+    const res = await fetch(`${API_BASE_URL}/summarize-paper`, {
       method: "POST",
     });
+
+    console.log("summarize-paper response status =", res.status);
 
     if (!res.ok) {
       throw new Error(`Summarize failed: ${res.status}`);
     }
 
     const data = await res.json();
-    // Our FastAPI returns: { "summary": "..." }
     setSummary(data.summary || "No summary returned.");
   } catch (err) {
+    console.error("summarize-paper error:", err);
     setSummary("Error: " + err.message);
   }
 
@@ -64,34 +78,38 @@ async function handleSummarize() {
 }
 
   async function handleAsk() {
-    const trimmed = question.trim();
-    if (!trimmed) return;
+  const trimmed = question.trim();
+  if (!trimmed) return;
 
-    setAnswering(true);
-    setAnswer("Thinking...");
+  console.log("handleAsk clicked, question =", trimmed);
 
-    try {
-      const res = await fetch("http://127.0.0.1:8000/ask", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question: trimmed }),
-      });
+  setAnswering(true);
+  setAnswer("Thinking...");
 
-      if (!res.ok) {
-        throw new Error(`Ask failed: ${res.status}`);
-      }
+  try {
+    const res = await fetch(`${API_BASE_URL}/ask`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question: trimmed }),
+    });
 
-      const data = await res.json();
-      // Our FastAPI /ask returns: { "answer": "..." }
-      setAnswer(data.answer || "No answer returned.");
-    } catch (err) {
-      setAnswer("Error: " + err.message);
+    console.log("ask response status =", res.status);
+
+    if (!res.ok) {
+      throw new Error(`Ask failed: ${res.status}`);
     }
 
-    setAnswering(false);
+    const data = await res.json();
+    setAnswer(data.answer || "No answer returned.");
+  } catch (err) {
+    console.error("ask error:", err);
+    setAnswer("Error: " + err.message);
   }
+
+  setAnswering(false);
+}
 
   return (
     <div className="app-container">
