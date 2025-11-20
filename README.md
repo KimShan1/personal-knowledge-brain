@@ -56,6 +56,7 @@ This project is intentionally simple but shows all essential RAG system componen
 
 ### Repo Structure
 
+```text
 personal-knowledge-brain/
 │
 ├── backend/
@@ -77,7 +78,7 @@ personal-knowledge-brain/
 │   └── vite.config.js
 │
 └── README.md                 # You are reading it 🙂
-
+```
 
 ### Technologies Used
 *Frontend*
@@ -91,13 +92,14 @@ personal-knowledge-brain/
 
 *Backend*
 - FastAPI: A modern, high-performance web framework for Python. Frontend needs to call the backend via HTTP and FastAPI provides these routes:
+```text
 | FastAPI Route           | Purpose                                          |
 | ----------------------- | ------------------------------------------------ |
 | `POST /upload-paper`    | Receive the PDF + index into OpenAI vector store |
 | `POST /summarize-paper` | Generate structured summary                      |
 | `POST /ask`             | Answer user questions using RAG                  |
 | `GET /`                 | Health check                                     |
-
+```
 - Uvicorn: A lightning-fast web server for Python/ASGI. FastAPI does not serve itself —> Uvicorn runs it
 - Pydantic: A data validation library FastAPI uses (enforces proper request formats, ensures user input is the correct type, automatically returns validation errors)
 - CORS Middleware: Middleware that controls which websites can call my API. Browsers block cross-site requests by default; CORS middleware tells the browser:"Yes, it’s safe — allow our frontend to talk to the backend."
