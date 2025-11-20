@@ -1,28 +1,25 @@
 from .config import client, VECTOR_STORE_ID
 
 # ---- Model + safety limits ----
-
-# We'll use a small, cheap model good for RAG.
+# Using a small cheap model good for RAG
 MODEL_NAME = "gpt-4.1-mini"
 
-# Hard limit for how long answers can be.
-# This controls cost per request.
+# Hard limit for how long answers can be to control cost per request
 MAX_TOKENS = 800
 
 
 def answer_question(question: str) -> str:
     """
-    Ask OpenAI to answer a question using our vector store (RAG).
-
+    Ask OpenAI to answer a question using our vector store (RAG)
     It uses the Responses API + file_search tool so OpenAI:
-    - searches your vector store (where your PDFs are indexed)
+    - searches our vector store (where our PDFs are indexed)
     - writes an answer grounded in those documents
     """
 
-    # This is the actual RAG call to OpenAI.
+    # This is the actual RAG call to OpenAI
     # - model: which model to use
     # - input: the user's question
-    # - tools: tell the model it can use file_search on your vector store
+    # - tools: tells the model it can use file_search on our vector store
     # - max_output_tokens: guardrail on answer length / cost
     response = client.responses.create(
         model=MODEL_NAME,
@@ -34,15 +31,13 @@ def answer_question(question: str) -> str:
         max_output_tokens=MAX_TOKENS,
     )
 
-    # The Responses API returns a structured object.
-    # We now try to extract the final answer text from it.
+    # The Responses API returns a structured object
+    # We now try to extract the final answer text from it:
     try:
-        # Often, the last output item contains the final answer.
+        # Often, the last output item contains the final answer
         last_output = response.output[-1]
         first_block = last_output.content[0]
 
-        # Depending on SDK version, .text might be a string
-        # or an object with a .value attribute.
         text = getattr(first_block, "text", None)
 
         if hasattr(text, "value"):
@@ -53,16 +48,14 @@ def answer_question(question: str) -> str:
 
     except Exception:
         # If something changes in the response structure,
-        # we don't want your app to crash.
+        # we don't want our app to crash.
         return "Sorry, I couldn't extract the answer properly from the model output."
 
-    # Fallback: at least return the whole response as a string (for debugging).
     return str(response)
 
 def summarize_paper() -> str:
     """
-    Generate a structured summary of the paper(s) in the vector store.
-
+    Generates a structured summary of the paper(s) in the vector store
     This uses the same RAG mechanism (file_search) but with a fixed prompt
     focused on:
     - high-level overview
@@ -92,7 +85,6 @@ def summarize_paper() -> str:
         max_output_tokens=MAX_TOKENS,
     )
 
-    # Reuse the same extraction logic as in answer_question
     try:
         last_output = response.output[-1]
         first_block = last_output.content[0]
